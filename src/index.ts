@@ -1,1 +1,3 @@
-export * from "./lib/number";
+import setupGrid from "./setupGrid";
+
+export default setupGrid;
