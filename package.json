@@ -20,17 +20,11 @@
     "test:lint": "tslint --project . && prettier \"src/**/*.ts\" --list-different",
     "test:unit": "jest",
     "watch": "npm run test:unit -- --watch",
-    "cov": "run-s build test:unit cov:html && opn coverage/index.html",
-    "doc": "run-s doc:html && opn build/docs/index.html",
-    "doc:html": "typedoc src/ --target ES6 --mode file --out build/docs",
-    "doc:json": "typedoc src/ --target ES6 --mode file --json build/docs/typedoc.json",
-    "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "version": "standard-version",
     "reset": "git clean -dfx && git reset --hard && npm i",
     "clean": "trash build",
-    "all": "run-s reset test cov:check doc:html",
-    "prepare-release": "run-s all version doc:publish",
-    "preinstall": "node -e \"if(process.env.npm_execpath.indexOf('yarn') === -1) throw new Error('grid-distribute must be installed with Yarn: https://yarnpkg.com/')\""
+    "all": "run-s reset test",
+    "prepare-release": "run-s all version"
   },
   "scripts-info": {
     "info": "Display information about the package scripts",
@@ -38,12 +32,9 @@
     "fix": "Try to automatically fix any linting problems",
     "test": "Lint and unit test the project",
     "watch": "Watch and rebuild the project on save, then rerun relevant tests",
-    "cov": "Rebuild, run tests, then create and open the coverage report",
-    "doc": "Generate HTML API documentation and open it in a browser",
-    "doc:json": "Generate API documentation in typedoc JSON format",
     "version": "Bump package.json version, update CHANGELOG.md, tag release",
     "reset": "Delete all untracked files and reset the repo to the last commit",
-    "prepare-release": "One-step: clean, build, test, publish docs, and prep a release"
+    "prepare-release": "One-step: clean, build, test, and prep a release"
   },
   "engines": {
     "node": ">=8.9"
@@ -66,7 +57,6 @@
     "tslint": "^5.10.0",
     "tslint-config-prettier": "^1.13.0",
     "tslint-immutable": "^4.5.4",
-    "typedoc": "^0.12.0",
     "typescript": "^3.0.1"
   },
   "prettier": {
