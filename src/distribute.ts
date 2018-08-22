@@ -200,11 +200,19 @@ const distribute = <E>(userOpts: UserOpts<E>, grid: GridInfo) => {
   };
 
   let prioSum = 0;
+  let minPrio = 0;
   const elsWithPrio = opts.elements.map(e => {
     const prio = opts.getPriority(e);
+    minPrio = Math.min(prio, minPrio);
     prioSum += prio;
     return {element: e, ratio: prio};
   });
+  if (minPrio < 0) {
+    elsWithPrio.forEach(ewp => {
+      ewp.ratio = ewp.ratio - minPrio;
+      prioSum -= minPrio;
+    });
+  }
   elsWithPrio.sort((s1, s2) => s2.ratio - s1.ratio);
   elsWithPrio.forEach(ewp => (ewp.ratio = ewp.ratio / prioSum));
 
