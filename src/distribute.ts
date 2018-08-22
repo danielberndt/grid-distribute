@@ -1,4 +1,5 @@
 import {TypedPriorityQueue} from "typedpriorityqueue";
+import {Solution, ValidTiles, Cell} from "./types";
 
 interface Options<E> {
   elements: E[];

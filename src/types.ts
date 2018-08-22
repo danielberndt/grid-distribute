@@ -1,15 +1,15 @@
-type ValidTiles = {
+export type ValidTiles = {
   [area: number]: {areaRatio: number; tiles: Array<{width: number; height: number}>};
 };
 
-interface Cell {
+export interface Cell {
   top: number;
   left: number;
   width: number;
   height: number;
 }
 
-interface Solution<E> {
+export interface Solution<E> {
   position: Cell;
   element: E;
 }

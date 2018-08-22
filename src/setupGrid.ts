@@ -1,4 +1,5 @@
 import distribute, {UserOpts} from "./distribute";
+import {ValidTiles} from "./types";
 
 interface GridOptions {
   width: number;
