@@ -18,6 +18,9 @@ interface GridInfo {
   tiles: ValidTiles;
 }
 
+// tiles that are not placed yet, are assumed to have a cost-factor of UNPOSITIONED_COST
+const UNPOSITIONED_COST = 0.5;
+
 /*
 cost policy:
 
@@ -37,7 +40,8 @@ interface ElementWithRatio<E> {
 
 interface PositionedTreeState<E> {
   type: "positioned";
-  cost: number;
+  realCost: number;
+  estimatedCost: number;
   gridMask: Uint8Array;
   remainingElements: Array<ElementWithRatio<E>>;
   solution: Array<Solution<E>>;
@@ -45,19 +49,23 @@ interface PositionedTreeState<E> {
 
 interface UnpositionedTreeState<E> {
   type: "unpositioned";
-  cost: number;
+  realCost: number;
+  estimatedCost: number;
   findPositions: () => Array<PositionedTreeState<E>>;
 }
 
 interface FinishedTreeState<E> {
   type: "finished";
-  cost: number;
+  realCost: number;
+  estimatedCost: number;
   solution: Array<Solution<E>>;
 }
 
 type TreeState<E> = PositionedTreeState<E> | UnpositionedTreeState<E>;
 
-const meanMultipliers = (muls: number[]) => 1 - muls.reduce((n1, n2) => (1 - n1) * (1 - n2), 0);
+const meanMultipliers = (muls: number[]) => 1 - muls.reduce((p, n) => p * (1 - n), 1);
+const costOfRemaining = <E>(elements: Array<ElementWithRatio<E>>) =>
+  elements.reduce((sum, el) => sum + el.ratio * UNPOSITIONED_COST, 0);
 
 const isFree = (
   left: number,
@@ -99,6 +107,9 @@ const findPositions = <E>({
   grid,
 }: FindPositionsArgs<E>) => {
   const validPositions: Array<PositionedTreeState<E>> = [];
+  // console.log(`  find ${tiles[0].width * tiles[0].height} area`);
+  const remaining = state.remainingElements.slice(1);
+  const remainingCost = costOfRemaining(remaining);
   tiles.forEach(({width, height}) => {
     for (let left = 0; left <= grid.width - width; left += 1) {
       for (let top = 0; top <= grid.height - height; top += 1) {
@@ -112,12 +123,14 @@ const findPositions = <E>({
               gridMask[y * grid.width + x] = 1;
             }
           }
+          const cost = state.realCost + meanMultipliers(costsMultipliers) * elementWithRatio.ratio;
 
           validPositions.push({
             type: "positioned",
-            cost: state.cost + meanMultipliers(costsMultipliers) * elementWithRatio.ratio,
+            realCost: cost,
+            estimatedCost: cost + remainingCost,
             gridMask,
-            remainingElements: state.remainingElements.slice(1),
+            remainingElements: remaining,
             solution: [
               ...state.solution,
               {
@@ -136,11 +149,13 @@ const findPositions = <E>({
     }
   });
   if (validPositions.length === 0) {
+    const cost = state.realCost + 1 * elementWithRatio.ratio;
     validPositions.push({
       type: "positioned",
-      cost: state.cost + elementWithRatio.ratio,
+      realCost: cost,
+      estimatedCost: cost + remainingCost,
       gridMask: state.gridMask,
-      remainingElements: state.remainingElements.slice(1),
+      remainingElements: remaining,
       solution: state.solution,
     });
   }
@@ -162,9 +177,11 @@ const explore = <E>(state: TreeState<E>, add: (newState: TreeState<E>) => void, 
       // if ratioDiff = 3 -> (1 - 0.33) * elementRatio -> 0.66 * elementRatio
       // if ratioDiff = 10 -> (1 - 0.1) * elementRatio -> 0.9 * elementRatio
       const ratioDiffMultiplier = (1 - 1 / ratioDiff) * 0.1;
+      const cost = state.realCost + ratioDiffMultiplier * ratio;
       add({
         type: "unpositioned",
-        cost: state.cost + ratioDiffMultiplier * ratio,
+        realCost: cost,
+        estimatedCost: cost + costOfRemaining(state.remainingElements.slice(1)),
         findPositions: () =>
           findPositions({state, ratioDiffMultiplier, tiles, elementWithRatio, grid}),
       });
@@ -193,14 +210,15 @@ const distribute = <E>(userOpts: UserOpts<E>, grid: GridInfo) => {
 
   const initialState: TreeState<E> = {
     type: "positioned",
-    cost: 0,
+    realCost: 0,
+    estimatedCost: costOfRemaining(elsWithPrio),
     gridMask: new Uint8Array(grid.width * grid.height),
     remainingElements: elsWithPrio,
     solution: [],
   };
 
   const queue = new TypedPriorityQueue<TreeState<E> | FinishedTreeState<E>>(
-    (s1, s2) => s1.cost < s2.cost
+    (s1, s2) => s1.estimatedCost < s2.estimatedCost
   );
   queue.add(initialState);
   // let iterationCount = 0;
@@ -208,16 +226,23 @@ const distribute = <E>(userOpts: UserOpts<E>, grid: GridInfo) => {
     // iterationCount += 1;
     const next = queue.poll();
     if (!next) return null;
+    // console.log(`[head] estd: ${next.estimatedCost.toFixed(3)} real: ${next.realCost.toFixed(3)}`);
+    // if (next.type === "positioned") {
+    //   drawGrid(next.gridMask, grid.width);
+    // }
     if (next.type === "finished") {
+      // console.log("finished", next.estimatedCost.toFixed(3));
       // console.log("iterations", iterationCount);
       return next.solution;
     }
     if (next.type === "positioned" && next.remainingElements.length === 0) {
       let openSpots = 0;
       next.gridMask.forEach(c => (openSpots += 1 - c));
+      const cost = next.realCost + (openSpots / (grid.width * grid.height)) * 0.75;
       queue.add({
         type: "finished",
-        cost: next.cost + (openSpots / (grid.width * grid.height)) * 0.5,
+        realCost: cost,
+        estimatedCost: cost,
         solution: next.solution,
       });
     }

@@ -8,18 +8,7 @@ Array [
     },
     "position": Object {
       "height": 3,
-      "left": 2,
-      "top": 0,
-      "width": 2,
-    },
-  },
-  Object {
-    "element": Object {
-      "prio": 2,
-    },
-    "position": Object {
-      "height": 1,
-      "left": 0,
+      "left": 1,
       "top": 0,
       "width": 2,
     },
@@ -31,7 +20,18 @@ Array [
     "position": Object {
       "height": 2,
       "left": 0,
-      "top": 1,
+      "top": 0,
+      "width": 1,
+    },
+  },
+  Object {
+    "element": Object {
+      "prio": 2,
+    },
+    "position": Object {
+      "height": 2,
+      "left": 3,
+      "top": 0,
       "width": 1,
     },
   },
@@ -41,8 +41,8 @@ Array [
     },
     "position": Object {
       "height": 1,
-      "left": 1,
-      "top": 1,
+      "left": 0,
+      "top": 2,
       "width": 1,
     },
   },
@@ -52,7 +52,7 @@ Array [
     },
     "position": Object {
       "height": 1,
-      "left": 1,
+      "left": 3,
       "top": 2,
       "width": 1,
     },
@@ -84,7 +84,7 @@ Array [
     },
     "position": Object {
       "height": 3,
-      "left": 0,
+      "left": 2,
       "top": 0,
       "width": 2,
     },
@@ -95,7 +95,7 @@ Array [
     },
     "position": Object {
       "height": 3,
-      "left": 2,
+      "left": 0,
       "top": 0,
       "width": 2,
     },
