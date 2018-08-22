@@ -21,8 +21,11 @@ const findValidTiles = ({width, height, minRatio, maxRatio}: FullGridOptions) =>
       if (ratio >= minRatio && ratio <= maxRatio) {
         const dim = {width: w, height: h};
         const info = tiles[w * h];
-        if (info) info.tiles.push(dim);
-        else tiles[w * h] = {areaRatio: (w * h) / fullArea, tiles: [dim]};
+        if (info) {
+          info.tiles.push(dim);
+        } else {
+          tiles[w * h] = {areaRatio: (w * h) / fullArea, tiles: [dim]};
+        }
       }
     }
   }
@@ -44,8 +47,8 @@ const setupGrid = (userOpts: GridOptions & Partial<OptionalGridOptions>) => {
 
   return {
     tiles,
-    distribute: <E>(userOpts: UserOpts<E>) =>
-      distribute(userOpts, {tiles, width: opts.width, height: opts.height}),
+    distribute: <E>(distUserOpts: UserOpts<E>) =>
+      distribute(distUserOpts, {tiles, width: opts.width, height: opts.height}),
   };
 };
 

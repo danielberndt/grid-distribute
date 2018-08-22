@@ -29,29 +29,29 @@ interval of [0, ratio]
 
 */
 
-type ElementWithRatio<E> = {
+interface ElementWithRatio<E> {
   element: E;
   ratio: number;
-};
+}
 
 interface PositionedTreeState<E> {
   type: "positioned";
   cost: number;
   gridMask: Uint8Array;
-  remainingElements: ElementWithRatio<E>[];
-  solution: Solution<E>[];
+  remainingElements: Array<ElementWithRatio<E>>;
+  solution: Array<Solution<E>>;
 }
 
 interface UnpositionedTreeState<E> {
   type: "unpositioned";
   cost: number;
-  findPositions: () => PositionedTreeState<E>[];
+  findPositions: () => Array<PositionedTreeState<E>>;
 }
 
 interface FinishedTreeState<E> {
   type: "finished";
   cost: number;
-  solution: Solution<E>[];
+  solution: Array<Solution<E>>;
 }
 
 type TreeState<E> = PositionedTreeState<E> | UnpositionedTreeState<E>;
@@ -83,13 +83,13 @@ const isFree = (
 //   console.log(s.join(""));
 // };
 
-type FindPositionsArgs<E> = {
+interface FindPositionsArgs<E> {
   state: PositionedTreeState<E>;
   ratioDiffMultiplier: number;
-  tiles: {width: number; height: number}[];
+  tiles: Array<{width: number; height: number}>;
   elementWithRatio: ElementWithRatio<E>;
   grid: GridInfo;
-};
+}
 const findPositions = <E>({
   state,
   ratioDiffMultiplier,
@@ -97,13 +97,13 @@ const findPositions = <E>({
   elementWithRatio,
   grid,
 }: FindPositionsArgs<E>) => {
-  const validPositions: PositionedTreeState<E>[] = [];
+  const validPositions: Array<PositionedTreeState<E>> = [];
   tiles.forEach(({width, height}) => {
     for (let left = 0; left <= grid.width - width; left += 1) {
       for (let top = 0; top <= grid.height - height; top += 1) {
         if (isFree(left, top, width, height, state.gridMask, grid)) {
-          const xDistanceFromCenter = Math.abs(0.5 - (left + width / 2) / grid.width) * 0.1;
-          const yDistanceFromCenter = Math.abs(0.5 - (top + height / 2) / grid.height) * 0.1;
+          const xDistanceFromCenter = Math.abs(0.5 - (left + width / 2) / grid.width) * 0.02;
+          const yDistanceFromCenter = Math.abs(0.5 - (top + height / 2) / grid.height) * 0.02;
           const costsMultipliers = [ratioDiffMultiplier, xDistanceFromCenter, yDistanceFromCenter];
           const gridMask = new Uint8Array(state.gridMask);
           for (let x = left; x < left + width; x += 1) {
@@ -160,7 +160,7 @@ const explore = <E>(state: TreeState<E>, add: (newState: TreeState<E>) => void, 
       // if ratioDiff = 1 -> (1 - 1) * elementRatio -> 0 * elementRatio
       // if ratioDiff = 3 -> (1 - 0.33) * elementRatio -> 0.66 * elementRatio
       // if ratioDiff = 10 -> (1 - 0.1) * elementRatio -> 0.9 * elementRatio
-      const ratioDiffMultiplier = 1 - 1 / ratioDiff;
+      const ratioDiffMultiplier = (1 - 1 / ratioDiff) * 0.1;
       add({
         type: "unpositioned",
         cost: state.cost + ratioDiffMultiplier * ratio,
@@ -204,11 +204,11 @@ const distribute = <E>(userOpts: UserOpts<E>, grid: GridInfo) => {
   queue.add(initialState);
   // let iterationCount = 0;
   while (true) {
-    // iterationCount+=1
+    // iterationCount += 1;
     const next = queue.poll();
     if (!next) return null;
     if (next.type === "finished") {
-      // console.log("iterations", iterationCount)
+      // console.log("iterations", iterationCount);
       return next.solution;
     }
     if (next.type === "positioned" && next.remainingElements.length === 0) {

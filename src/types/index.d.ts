@@ -1,5 +1,5 @@
 type ValidTiles = {
-  [area: number]: {areaRatio: number; tiles: {width: number; height: number}[]};
+  [area: number]: {areaRatio: number; tiles: Array<{width: number; height: number}>};
 };
 
 interface Cell {

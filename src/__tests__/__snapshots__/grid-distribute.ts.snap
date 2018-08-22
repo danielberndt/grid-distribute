@@ -18,10 +18,10 @@ Array [
       "prio": 2,
     },
     "position": Object {
-      "height": 2,
+      "height": 1,
       "left": 0,
-      "top": 1,
-      "width": 1,
+      "top": 0,
+      "width": 2,
     },
   },
   Object {
@@ -30,7 +30,7 @@ Array [
     },
     "position": Object {
       "height": 2,
-      "left": 1,
+      "left": 0,
       "top": 1,
       "width": 1,
     },
@@ -41,8 +41,8 @@ Array [
     },
     "position": Object {
       "height": 1,
-      "left": 0,
-      "top": 0,
+      "left": 1,
+      "top": 1,
       "width": 1,
     },
   },
@@ -53,7 +53,7 @@ Array [
     "position": Object {
       "height": 1,
       "left": 1,
-      "top": 0,
+      "top": 2,
       "width": 1,
     },
   },
