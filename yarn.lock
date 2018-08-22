@@ -4292,6 +4292,10 @@ typedoc@^0.12.0:
     typedoc-default-themes "^0.5.0"
     typescript "3.0.x"
 
+typedpriorityqueue@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/typedpriorityqueue/-/typedpriorityqueue-1.0.1.tgz#02892a995c36677fd2b7c31b464d35823a5634be"
+
 typescript@3.0.x, typescript@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.1.tgz#43738f29585d3a87575520a4b93ab6026ef11fdb"

@@ -1,0 +1,104 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`distribute works with many elements 1`] = `
+Array [
+  Object {
+    "element": Object {
+      "prio": 4,
+    },
+    "position": Object {
+      "height": 3,
+      "left": 2,
+      "top": 0,
+      "width": 2,
+    },
+  },
+  Object {
+    "element": Object {
+      "prio": 2,
+    },
+    "position": Object {
+      "height": 2,
+      "left": 0,
+      "top": 1,
+      "width": 1,
+    },
+  },
+  Object {
+    "element": Object {
+      "prio": 2,
+    },
+    "position": Object {
+      "height": 2,
+      "left": 1,
+      "top": 1,
+      "width": 1,
+    },
+  },
+  Object {
+    "element": Object {
+      "prio": 1,
+    },
+    "position": Object {
+      "height": 1,
+      "left": 0,
+      "top": 0,
+      "width": 1,
+    },
+  },
+  Object {
+    "element": Object {
+      "prio": 0.5,
+    },
+    "position": Object {
+      "height": 1,
+      "left": 1,
+      "top": 0,
+      "width": 1,
+    },
+  },
+]
+`;
+
+exports[`distribute works with one element 1`] = `
+Array [
+  Object {
+    "element": Object {
+      "prio": 2,
+    },
+    "position": Object {
+      "height": 3,
+      "left": 0,
+      "top": 0,
+      "width": 4,
+    },
+  },
+]
+`;
+
+exports[`distribute works with two identical elements 1`] = `
+Array [
+  Object {
+    "element": Object {
+      "prio": 2,
+    },
+    "position": Object {
+      "height": 3,
+      "left": 0,
+      "top": 0,
+      "width": 2,
+    },
+  },
+  Object {
+    "element": Object {
+      "prio": 2,
+    },
+    "position": Object {
+      "height": 3,
+      "left": 2,
+      "top": 0,
+      "width": 2,
+    },
+  },
+]
+`;

@@ -12,10 +12,6 @@ interface OptionalGridOptions {
 
 type FullGridOptions = GridOptions & OptionalGridOptions;
 
-export type ValidTiles = {
-  [area: number]: {areaRatio: number; tiles: {width: number; height: number}[]};
-};
-
 const findValidTiles = ({width, height, minRatio, maxRatio}: FullGridOptions) => {
   const tiles: ValidTiles = {};
   const fullArea = width * height;
@@ -48,7 +44,8 @@ const setupGrid = (userOpts: GridOptions & Partial<OptionalGridOptions>) => {
 
   return {
     tiles,
-    distribute: <E>(userOpts: UserOpts<E>) => distribute(userOpts, {tiles, width, height}),
+    distribute: <E>(userOpts: UserOpts<E>) =>
+      distribute(userOpts, {tiles, width: opts.width, height: opts.height}),
   };
 };
 

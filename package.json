@@ -48,7 +48,9 @@
   "engines": {
     "node": ">=8.9"
   },
-  "dependencies": {},
+  "dependencies": {
+    "typedpriorityqueue": "^1.0.1"
+  },
   "devDependencies": {
     "@types/jest": "^23.3.1",
     "codecov": "^3.0.2",
@@ -73,7 +75,9 @@
     "bracketSpacing": false
   },
   "jest": {
-    "roots": ["src"],
+    "roots": [
+      "src"
+    ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
