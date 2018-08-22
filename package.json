@@ -1,6 +1,6 @@
 {
   "name": "grid-distribute",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Distribute cells in a grid",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -20,11 +20,10 @@
     "test:lint": "tslint --project . && prettier \"src/**/*.ts\" --list-different",
     "test:unit": "jest",
     "watch": "npm run test:unit -- --watch",
-    "version": "standard-version",
-    "reset": "git clean -dfx && git reset --hard && npm i",
+    "reset": "git clean -dfx && git reset --hard && yarn",
     "clean": "trash build",
-    "all": "run-s reset test",
-    "prepare-release": "run-s all version"
+    "all": "run-s reset test build",
+    "prepare-release": "run-s all"
   },
   "scripts-info": {
     "info": "Display information about the package scripts",
@@ -32,7 +31,6 @@
     "fix": "Try to automatically fix any linting problems",
     "test": "Lint and unit test the project",
     "watch": "Watch and rebuild the project on save, then rerun relevant tests",
-    "version": "Bump package.json version, update CHANGELOG.md, tag release",
     "reset": "Delete all untracked files and reset the repo to the last commit",
     "prepare-release": "One-step: clean, build, test, and prep a release"
   },
@@ -44,19 +42,13 @@
   },
   "devDependencies": {
     "@types/jest": "^23.3.1",
-    "codecov": "^3.0.2",
-    "cz-conventional-changelog": "^2.1.0",
-    "gh-pages": "^1.2.0",
     "jest": "^23.5.0",
     "npm-run-all": "^4.1.3",
-    "opn-cli": "^3.1.0",
     "prettier": "^1.13.4",
-    "standard-version": "^4.4.0",
     "trash-cli": "^1.4.0",
     "ts-jest": "^23.1.4",
     "tslint": "^5.10.0",
     "tslint-config-prettier": "^1.13.0",
-    "tslint-immutable": "^4.5.4",
     "typescript": "^3.0.1"
   },
   "prettier": {
@@ -77,10 +69,5 @@
       "js",
       "json"
     ]
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
   }
 }
