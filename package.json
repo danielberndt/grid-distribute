@@ -1,13 +1,14 @@
 {
   "name": "grid-distribute",
   "version": "0.3.0",
-  "description": "Distribute cells in a grid",
+  "description": "Efficiently distribute elements on a grid according to their priority or score.",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
   "repository": "https://github.com/danielberndt/grid-distribute",
   "license": "MIT",
-  "keywords": [],
+  "keywords": ["grid", "layout-algorithm", "dashboard", "masonry"],
+  "author": "Daniel Berndt <daniel.berndt@gmail.com> (http://danielberndt.net/)",
   "scripts": {
     "info": "npm-scripts-info",
     "build": "run-s clean && run-p build:*",
