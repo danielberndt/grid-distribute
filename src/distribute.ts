@@ -18,7 +18,7 @@ interface OptionalOptions<E> {
   costOfEmptyCell: number;
   ratioDiffWeight: number;
   costsOfPlacement: (opts: CostsOfPlacementArg<E>) => number[];
-  skipMultiplier: number;
+  skipMultiplier: (element: E) => number;
 }
 
 export type UserOptions<E> = Options<E> & Partial<OptionalOptions<E>>;
@@ -158,7 +158,8 @@ const findPositions = <E>({
     }
   });
   if (validPositions.length === 0) {
-    const cost = state.realCost + opts.skipMultiplier * elementWithRatio.ratio;
+    const cost =
+      state.realCost + opts.skipMultiplier(elementWithRatio.element) * elementWithRatio.ratio;
     validPositions.push({
       type: "positioned",
       realCost: cost,
@@ -184,13 +185,13 @@ const explore = <E>(
     if (!elementWithRatio) return;
     const {ratio} = elementWithRatio;
     Object.values(grid.tiles).forEach(({areaRatio, tiles}) => {
-      const ratioDiff = Math.max(areaRatio / ratio, ratio / areaRatio);
+      const ratioDiff = 1 - Math.min(areaRatio / ratio, ratio / areaRatio);
       // ratioDiff: 2 if tileRatio is twice or half as big as elementRatio
       // dont add cost if ratioDiff = 1
       // if ratioDiff = 1 -> (1 - 1) * elementRatio -> 0 * elementRatio
       // if ratioDiff = 3 -> (1 - 0.33) * elementRatio -> 0.66 * elementRatio
       // if ratioDiff = 10 -> (1 - 0.1) * elementRatio -> 0.9 * elementRatio
-      const ratioDiffMultiplier = (1 - 1 / ratioDiff) * opts.ratioDiffWeight;
+      const ratioDiffMultiplier = ratioDiff * opts.ratioDiffWeight;
       add({
         type: "unpositioned",
         realCost: state.realCost,
@@ -217,7 +218,7 @@ const defaultOpts: OptionalOptions<any> = {
   costOfEmptyCell: 0.75,
   ratioDiffWeight: 0.1,
   costsOfPlacement: defaultCostsOfPlacement,
-  skipMultiplier: 1,
+  skipMultiplier: () => 1,
 };
 
 const distribute = <E>(userOpts: UserOptions<E>, grid: GridInfo) => {
