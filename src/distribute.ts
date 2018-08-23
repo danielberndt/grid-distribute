@@ -134,7 +134,7 @@ const findPositions = <E>({
           const costsMultipliers = opts.costsOfPlacement({
             ratioDiffMultiplier,
             element: elementWithRatio.element,
-            position: position,
+            position,
             grid,
           });
           const cost = state.realCost + meanMultipliers(costsMultipliers) * elementWithRatio.ratio;
