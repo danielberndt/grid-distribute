@@ -1,3 +1,2 @@
-import setupGrid from "./setupGrid";
-
-export default setupGrid;
+export {default} from "./setupGrid";
+export {defaultCostsOfPlacement} from "./distribute";
