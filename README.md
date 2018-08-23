@@ -70,21 +70,21 @@ There is no guarantee that all elements will be placed onto the grid. Passing a 
 
 Pass a list of arbitrary objects that need to be put onto the grid.
 
-#### option: `getPriority: (e: E) => number` [required]
+#### option: `getPriority: (element: E) => number` [required]
 
 Pass a callback that extracts a priority value for an `element`. Priorities will be normalized by the algorithm, so it can be any number. Elements with higher priority will be assigned tiles with less costs. (i.e. typically a greater area).
 
-#### options `costOfUnexplored: (e: E) => number` default: `() => 0.5`
+#### option: `costOfUnexplored: (element: E) => number` default: `() => 0.5`
 
 This option deterimines the greediness of the algorithm by assigning an estimated cost to elements that haven't been placed yet.
 
 The `cost` needs to be between `0` and `1`. Setting this value to `0` will perform an exhaustive search returning the optimal solution given the costs. This will result in thousands of iterations even for few elements placed on a grid. Setting this value to `1` will lead to very few iteration cycles leading to a sub-optimal solution since backtracking is deemed too expensive due to the high cost of unexplored solutions.
 
-#### options `costOfEmptyCell: number` default: `0.75`
+#### option: `costOfEmptyCell: number` default: `0.75`
 
 This option determines the cost of an empty cell in the final solution.
 
-#### options `ratioDiffWeight: number` default: `0.1`
+#### option: `ratioDiffWeight: number` default: `0.1`
 
 `ratioDiff` refers to the relative size of the normalized element priority and the the ratio of the assigned tile area compared to the whole grid size.
 
@@ -95,7 +95,7 @@ The tile takes up `6` of the `9` grid cells. So its ratio is about `0.66`. The r
 
 The `ratioDiffWeight` determines the weight of the `ratioDiff` when estimating the cost of placing this element. Setting it to `0` would mean that a ratio difference would not matter, and higher values would encourage solutions in which the `ratioDiff` is as small as possible at the expense of more iterations.
 
-#### options `costsOfPlacement: ({element, position, grid, ratioDiffMultiplier}) => number[]` default: `defaultCostsOfPlacement`
+#### option: `costsOfPlacement: ({element, position, grid, ratioDiffMultiplier}) => number[]` default: `defaultCostsOfPlacement`
 
 Determine the cost multipliers when placing an element on a grid. The cost multipliers are an array of numbers in the range of `0` to `1`. These values get averraged. Higher values indicate a sub-optimal placement for the given element, whereas a cost of `0` would indicate a perfect placement.
 
@@ -111,7 +111,7 @@ Here's the description of the of the callback arguments:
 
 **`ratioDiffMultiplier: number`** the cost as determined by the `ratioDiff` and the `ratioDiffWeight`
 
-#### options `skipMultiplier: (element: E) => number` default: `1`
+#### option: `skipMultiplier: (element: E) => number` default: `1`
 
 This option determines the cost of not placing the given element on the grid.
 
