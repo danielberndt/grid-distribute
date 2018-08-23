@@ -8,7 +8,7 @@ interface Options<E> {
 
 interface CostsOfPlacementArg<E> {
   element: E;
-  cell: Cell;
+  position: Cell;
   grid: GridInfo;
   ratioDiffMultiplier: number;
 }
@@ -134,7 +134,7 @@ const findPositions = <E>({
           const costsMultipliers = opts.costsOfPlacement({
             ratioDiffMultiplier,
             element: elementWithRatio.element,
-            cell: position,
+            position: position,
             grid,
           });
           const cost = state.realCost + meanMultipliers(costsMultipliers) * elementWithRatio.ratio;
@@ -207,9 +207,11 @@ const explore = <E>(
 };
 
 export const defaultCostsOfPlacement = <E>(opts: CostsOfPlacementArg<E>) => {
-  const {ratioDiffMultiplier, cell, grid} = opts;
-  const xDistanceFromCenter = Math.abs(0.5 - (cell.left + cell.width / 2) / grid.width) * 0.02;
-  const yDistanceFromCenter = Math.abs(0.5 - (cell.top + cell.height / 2) / grid.height) * 0.02;
+  const {ratioDiffMultiplier, position, grid} = opts;
+  const xDistanceFromCenter =
+    Math.abs(0.5 - (position.left + position.width / 2) / grid.width) * 0.02;
+  const yDistanceFromCenter =
+    Math.abs(0.5 - (position.top + position.height / 2) / grid.height) * 0.02;
   return [ratioDiffMultiplier, xDistanceFromCenter, yDistanceFromCenter];
 };
 
