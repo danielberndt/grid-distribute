@@ -6,20 +6,28 @@ interface Options<E> {
   getPriority: (e: E) => number;
 }
 
-interface OptionalOptions<E> {
-  modifyCost: (element: E, cell: Cell) => number;
+interface CostsOfPlacementArg<E> {
+  element: E;
+  cell: Cell;
+  grid: GridInfo;
+  ratioDiffMultiplier: number;
 }
 
-export type UserOpts<E> = Options<E> & Partial<OptionalOptions<E>>;
+interface OptionalOptions<E> {
+  costOfUnexplored: (element: E) => number;
+  costOfEmptyCell: number;
+  ratioDiffWeight: number;
+  costsOfPlacement: (opts: CostsOfPlacementArg<E>) => number[];
+}
+
+export type UserOptions<E> = Options<E> & Partial<OptionalOptions<E>>;
+type FullOptions<E> = Options<E> & OptionalOptions<E>;
 
 interface GridInfo {
   width: number;
   height: number;
   tiles: ValidTiles;
 }
-
-// tiles that are not placed yet, are assumed to have a cost-factor of UNPOSITIONED_COST
-const UNPOSITIONED_COST = 0.5;
 
 /*
 cost policy:
@@ -30,7 +38,6 @@ if all elements are placed perfectly the total cost is 0.
 Assume an element has a ratio of 0.3. Placing it at the perfect spot, would reduce the cost at 0.3.
 Not placing it all has a cost of 0.3. So assigning a cost to placing an element has to be in the
 interval of [0, ratio]
-
 */
 
 interface ElementWithRatio<E> {
@@ -64,8 +71,8 @@ interface FinishedTreeState<E> {
 type TreeState<E> = PositionedTreeState<E> | UnpositionedTreeState<E>;
 
 const meanMultipliers = (muls: number[]) => 1 - muls.reduce((p, n) => p * (1 - n), 1);
-const costOfRemaining = <E>(elements: Array<ElementWithRatio<E>>) =>
-  elements.reduce((sum, el) => sum + el.ratio * UNPOSITIONED_COST, 0);
+const costOfRemaining = <E>(elements: Array<ElementWithRatio<E>>, opts: FullOptions<E>) =>
+  elements.reduce((sum, el) => sum + el.ratio * opts.costOfUnexplored(el.element), 0);
 
 const isFree = (
   left: number,
@@ -98,6 +105,7 @@ interface FindPositionsArgs<E> {
   tiles: Array<{width: number; height: number}>;
   elementWithRatio: ElementWithRatio<E>;
   grid: GridInfo;
+  opts: FullOptions<E>;
 }
 const findPositions = <E>({
   state,
@@ -105,24 +113,29 @@ const findPositions = <E>({
   tiles,
   elementWithRatio,
   grid,
+  opts,
 }: FindPositionsArgs<E>) => {
   const validPositions: Array<PositionedTreeState<E>> = [];
   // console.log(`  find ${tiles[0].width * tiles[0].height} area`);
   const remaining = state.remainingElements.slice(1);
-  const remainingCost = costOfRemaining(remaining);
+  const remainingCost = costOfRemaining(remaining, opts);
   tiles.forEach(({width, height}) => {
     for (let left = 0; left <= grid.width - width; left += 1) {
       for (let top = 0; top <= grid.height - height; top += 1) {
         if (isFree(left, top, width, height, state.gridMask, grid)) {
-          const xDistanceFromCenter = Math.abs(0.5 - (left + width / 2) / grid.width) * 0.02;
-          const yDistanceFromCenter = Math.abs(0.5 - (top + height / 2) / grid.height) * 0.02;
-          const costsMultipliers = [ratioDiffMultiplier, xDistanceFromCenter, yDistanceFromCenter];
           const gridMask = new Uint8Array(state.gridMask);
           for (let x = left; x < left + width; x += 1) {
             for (let y = top; y < top + height; y += 1) {
               gridMask[y * grid.width + x] = 1;
             }
           }
+          const position = {left, top, width, height};
+          const costsMultipliers = opts.costsOfPlacement({
+            ratioDiffMultiplier,
+            element: elementWithRatio.element,
+            cell: position,
+            grid,
+          });
           const cost = state.realCost + meanMultipliers(costsMultipliers) * elementWithRatio.ratio;
 
           validPositions.push({
@@ -134,12 +147,7 @@ const findPositions = <E>({
             solution: [
               ...state.solution,
               {
-                position: {
-                  left,
-                  top,
-                  width,
-                  height,
-                },
+                position,
                 element: elementWithRatio.element,
               },
             ],
@@ -162,7 +170,12 @@ const findPositions = <E>({
   return validPositions;
 };
 
-const explore = <E>(state: TreeState<E>, add: (newState: TreeState<E>) => void, grid: GridInfo) => {
+const explore = <E>(
+  state: TreeState<E>,
+  add: (newState: TreeState<E>) => void,
+  grid: GridInfo,
+  opts: FullOptions<E>
+) => {
   if (state.type === "unpositioned") {
     state.findPositions().forEach(s => add(s));
   } else {
@@ -176,28 +189,37 @@ const explore = <E>(state: TreeState<E>, add: (newState: TreeState<E>) => void, 
       // if ratioDiff = 1 -> (1 - 1) * elementRatio -> 0 * elementRatio
       // if ratioDiff = 3 -> (1 - 0.33) * elementRatio -> 0.66 * elementRatio
       // if ratioDiff = 10 -> (1 - 0.1) * elementRatio -> 0.9 * elementRatio
-      const ratioDiffMultiplier = (1 - 1 / ratioDiff) * 0.1;
-      const cost = state.realCost + ratioDiffMultiplier * ratio;
+      const ratioDiffMultiplier = (1 - 1 / ratioDiff) * opts.ratioDiffWeight;
       add({
         type: "unpositioned",
-        realCost: cost,
-        estimatedCost: cost + costOfRemaining(state.remainingElements.slice(1)),
+        realCost: state.realCost,
+        estimatedCost:
+          state.realCost +
+          ratioDiffMultiplier * ratio +
+          costOfRemaining(state.remainingElements.slice(1), opts),
         findPositions: () =>
-          findPositions({state, ratioDiffMultiplier, tiles, elementWithRatio, grid}),
+          findPositions({state, ratioDiffMultiplier, tiles, elementWithRatio, grid, opts}),
       });
     });
   }
 };
 
-const defaultOpts: OptionalOptions<any> = {
-  modifyCost: () => 1,
+export const defaultCostsOfPlacement = <E>(opts: CostsOfPlacementArg<E>) => {
+  const {ratioDiffMultiplier, cell, grid} = opts;
+  const xDistanceFromCenter = Math.abs(0.5 - (cell.left + cell.width / 2) / grid.width) * 0.02;
+  const yDistanceFromCenter = Math.abs(0.5 - (cell.top + cell.height / 2) / grid.height) * 0.02;
+  return [ratioDiffMultiplier, xDistanceFromCenter, yDistanceFromCenter];
 };
 
-const distribute = <E>(userOpts: UserOpts<E>, grid: GridInfo) => {
-  const opts = {
-    ...defaultOpts,
-    ...userOpts,
-  };
+const defaultOpts: OptionalOptions<any> = {
+  costOfUnexplored: () => 0.5,
+  costOfEmptyCell: 0.75,
+  ratioDiffWeight: 0.1,
+  costsOfPlacement: defaultCostsOfPlacement,
+};
+
+const distribute = <E>(userOpts: UserOptions<E>, grid: GridInfo) => {
+  const opts = {...defaultOpts, ...userOpts};
 
   let prioSum = 0;
   let minPrio = 0;
@@ -219,7 +241,7 @@ const distribute = <E>(userOpts: UserOpts<E>, grid: GridInfo) => {
   const initialState: TreeState<E> = {
     type: "positioned",
     realCost: 0,
-    estimatedCost: costOfRemaining(elsWithPrio),
+    estimatedCost: costOfRemaining(elsWithPrio, opts),
     gridMask: new Uint8Array(grid.width * grid.height),
     remainingElements: elsWithPrio,
     solution: [],
@@ -246,7 +268,7 @@ const distribute = <E>(userOpts: UserOpts<E>, grid: GridInfo) => {
     if (next.type === "positioned" && next.remainingElements.length === 0) {
       let openSpots = 0;
       next.gridMask.forEach(c => (openSpots += 1 - c));
-      const cost = next.realCost + (openSpots / (grid.width * grid.height)) * 0.75;
+      const cost = next.realCost + (openSpots / (grid.width * grid.height)) * opts.costOfEmptyCell;
       queue.add({
         type: "finished",
         realCost: cost,
@@ -254,7 +276,7 @@ const distribute = <E>(userOpts: UserOpts<E>, grid: GridInfo) => {
         solution: next.solution,
       });
     }
-    explore(next, s => queue.add(s), grid);
+    explore(next, s => queue.add(s), grid, opts);
   }
 };
 

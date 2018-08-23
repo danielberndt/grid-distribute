@@ -1,4 +1,4 @@
-import distribute, {UserOpts} from "./distribute";
+import distribute, {UserOptions} from "./distribute";
 import {ValidTiles} from "./types";
 
 interface GridOptions {
@@ -48,7 +48,7 @@ const setupGrid = (userOpts: GridOptions & Partial<OptionalGridOptions>) => {
 
   return {
     tiles,
-    distribute: <E>(distUserOpts: UserOpts<E>) =>
+    distribute: <E>(distUserOpts: UserOptions<E>) =>
       distribute(distUserOpts, {tiles, width: opts.width, height: opts.height}),
   };
 };
