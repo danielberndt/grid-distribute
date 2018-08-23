@@ -18,6 +18,7 @@ interface OptionalOptions<E> {
   costOfEmptyCell: number;
   ratioDiffWeight: number;
   costsOfPlacement: (opts: CostsOfPlacementArg<E>) => number[];
+  skipMultiplier: number;
 }
 
 export type UserOptions<E> = Options<E> & Partial<OptionalOptions<E>>;
@@ -157,7 +158,7 @@ const findPositions = <E>({
     }
   });
   if (validPositions.length === 0) {
-    const cost = state.realCost + 1 * elementWithRatio.ratio;
+    const cost = state.realCost + opts.skipMultiplier * elementWithRatio.ratio;
     validPositions.push({
       type: "positioned",
       realCost: cost,
@@ -216,6 +217,7 @@ const defaultOpts: OptionalOptions<any> = {
   costOfEmptyCell: 0.75,
   ratioDiffWeight: 0.1,
   costsOfPlacement: defaultCostsOfPlacement,
+  skipMultiplier: 1,
 };
 
 const distribute = <E>(userOpts: UserOptions<E>, grid: GridInfo) => {
